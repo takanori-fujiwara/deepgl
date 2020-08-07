@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>deepgl_utils &mdash; deepgl  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> deepgl
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deepgl.html">deepgl module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deepgl_utils.html">deepgl_utils module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sample.html">sample module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">setup module</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">deepgl</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>deepgl_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for deepgl_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">graph_tool.all</span> <span class="k">as</span> <span class="nn">gt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+
+
+<div class="viewcode-block" id="FeatDefUtil"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.FeatDefUtil">[docs]</a><span class="k">class</span> <span class="nc">FeatDefUtil</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kc">None</span>
+
+<div class="viewcode-block" id="FeatDefUtil.to_base_feat"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.FeatDefUtil.to_base_feat">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">to_base_feat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">feat_def</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">feat_def</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="NeighborOp"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.NeighborOp">[docs]</a><span class="k">class</span> <span class="nc">NeighborOp</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kc">None</span>
+
+<div class="viewcode-block" id="NeighborOp.out_nbr"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.NeighborOp.out_nbr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">out_nbr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">get_out_neighbors</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeighborOp.in_nbr"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.NeighborOp.in_nbr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">in_nbr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">g</span><span class="o">.</span><span class="n">get_in_neighbors</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NeighborOp.all_nbr"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.NeighborOp.all_nbr">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">all_nbr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">g</span><span class="o">.</span><span class="n">get_out_neighbors</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">g</span><span class="o">.</span><span class="n">get_in_neighbors</span><span class="p">(</span><span class="n">v</span><span class="p">)),</span>
+                           <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="RelFeatOp"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp">[docs]</a><span class="k">class</span> <span class="nc">RelFeatOp</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kc">None</span>
+
+<div class="viewcode-block" id="RelFeatOp.mean"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp.mean">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">na_fill</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">na_fill</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="RelFeatOp.sum"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp.sum">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="RelFeatOp.maximum"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp.maximum">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">init</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="RelFeatOp.hadamard"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp.hadamard">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">hadamard</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">init</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">*=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="RelFeatOp.lp_norm"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp.lp_norm">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">lp_norm</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p must not be = 0&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">init</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">**</span><span class="n">p</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RelFeatOp.rbf"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.RelFeatOp.rbf">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">rbf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">na_fill</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">init</span>
+
+        <span class="n">mean</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">sq_mean</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+            <span class="n">sq</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">sq</span>
+            <span class="n">mean</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
+            <span class="n">sq_mean</span> <span class="o">+=</span> <span class="n">sq</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">na_fill</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mean</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+            <span class="n">sq_mean</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">sq_mean</span> <span class="o">-</span> <span class="n">mean</span><span class="o">**</span><span class="mi">2</span>
+            <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">na_fill</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">result</span> <span class="o">/</span> <span class="n">var</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">return</span> <span class="n">result</span></div></div>
+
+
+<div class="viewcode-block" id="Processing"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.Processing">[docs]</a><span class="k">class</span> <span class="nc">Processing</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kc">None</span>
+
+<div class="viewcode-block" id="Processing.log_binning"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.Processing.log_binning">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">log_binning</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;alpha must between 0.0 and 1.0&#39;</span><span class="p">)</span>
+
+        <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">X_argsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">bin_start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">bin_width</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">bin_val</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">bin_start</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
+            <span class="n">bin_end</span> <span class="o">=</span> <span class="n">bin_start</span> <span class="o">+</span> <span class="n">bin_width</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">X_argsort</span><span class="p">[</span><span class="n">bin_start</span><span class="p">:</span><span class="n">bin_end</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin_val</span>
+
+            <span class="n">bin_start</span> <span class="o">=</span> <span class="n">bin_end</span>
+            <span class="n">bin_width</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">bin_width</span><span class="p">)</span>
+            <span class="n">bin_val</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Processing.feat_diffusion"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.Processing.feat_diffusion">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">feat_diffusion</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">g</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">D_inv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">D</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">A</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;input at least either g or D &amp; A&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">A</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">gt</span><span class="o">.</span><span class="n">adjacency</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">D_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># TODO: maybe need to change here when using undirected graph</span>
+                <span class="n">D_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">g</span><span class="o">.</span><span class="n">get_in_degrees</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">get_vertices</span><span class="p">()))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">iter</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">D_inv</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Processing.prune_feats"><a class="viewcode-back" href="../deepgl_utils.html#deepgl_utils.Processing.prune_feats">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">prune_feats</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">,</span>
+                    <span class="n">feat_defs</span><span class="p">,</span>
+                    <span class="n">lambda_value</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                    <span class="n">measure</span><span class="o">=</span><span class="s1">&#39;cosine_similarity&#39;</span><span class="p">):</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_last_feat_defs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feat_defs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">ug</span> <span class="o">=</span> <span class="n">gt</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">ug</span><span class="o">.</span><span class="n">add_vertex</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span>
+
+        <span class="n">ug</span><span class="o">.</span><span class="n">edge_properties</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ug</span><span class="o">.</span><span class="n">new_edge_property</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+        <span class="n">sim_mat</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">measure</span> <span class="o">+</span> <span class="s1">&#39;(X.transpose())&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">n_last_feat_defs</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">n_last_feat_defs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">sim_mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">lambda_value</span><span class="p">:</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="n">ug</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="n">ug</span><span class="o">.</span><span class="n">edge_properties</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">][</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim_mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="n">comp_labels</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gt</span><span class="o">.</span><span class="n">label_components</span><span class="p">(</span><span class="n">ug</span><span class="p">)</span>
+        <span class="n">uniq_comp_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">comp_labels</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="n">repr_feat_defs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">remove_X_cols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">comp_label</span> <span class="ow">in</span> <span class="n">uniq_comp_labels</span><span class="p">:</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">comp_labels</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="n">comp_label</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># only take last layer&#39;s ones</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">comp</span><span class="p">[</span><span class="n">comp</span> <span class="o">&gt;=</span> <span class="n">d</span> <span class="o">-</span> <span class="n">n_last_feat_defs</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># only take first one as a representative feature</span>
+                <span class="n">repr_feat_defs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feat_defs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">comp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span>
+                                                    <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">n_last_feat_defs</span><span class="p">)])</span>
+                <span class="n">remove_X_cols</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">comp</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="c1"># note: repr_feat_defs might have different order from original</span>
+        <span class="c1"># so, we need to handle this way (but probably can be simplified)</span>
+        <span class="n">remove_feat_idices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feat_defs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">feat_defs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">repr_feat_defs</span><span class="p">:</span>
+                <span class="n">remove_feat_idices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">remove_feat_idices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">feat_defs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">remove_X_cols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">feat_defs</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Author
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

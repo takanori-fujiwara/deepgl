@@ -1,0 +1,651 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>deepgl &mdash; deepgl  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> deepgl
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../deepgl.html">deepgl module</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">deepgl</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>deepgl</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for deepgl</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">graph_tool.all</span> <span class="k">as</span> <span class="nn">gt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">deepgl_utils</span> <span class="kn">import</span> <span class="n">NeighborOp</span><span class="p">,</span> <span class="n">Processing</span><span class="p">,</span> <span class="n">RelFeatOp</span>
+
+<span class="c1"># TODO: support local graphlet</span>
+<span class="c1"># TODO: use more matrix calc (right now following the psuedocode in the paper)</span>
+<span class="c1"># TODO: use more sparse matrix to save memory usage</span>
+<span class="c1"># TODO: add arg to select eracing info of the pruned features from graph object</span>
+<span class="c1"># TODO: do sanity check for input of base_feats</span>
+<span class="c1"># TODO: support summation and multiplication of relational functions later</span>
+
+
+<div class="viewcode-block" id="DeepGL"><a class="viewcode-back" href="../deepgl.html#deepgl.DeepGL">[docs]</a><span class="k">class</span> <span class="nc">DeepGL</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    DeepGL from Rossi et al., 2018 (https://ieeexplore.ieee.org/document/8519335).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_feat_defs: list of strings, optional, (default=[&#39;in_degree&#39;, &#39;out_degree&#39;, &#39;total_degree&#39;, &#39;pagerank&#39;, &#39;kcore_decomposition&#39;])</span>
+<span class="sd">        Base features considered for network representation learning. Current</span>
+<span class="sd">        implementation supports base features available in graph-tool:</span>
+<span class="sd">        &#39;in_degree&#39;, &#39;out_degree&#39;, &#39;total_degree&#39;, &#39;pagerank&#39;, &#39;betweenness&#39;,</span>
+<span class="sd">        &#39;closeness&#39;, &#39;eigenvector&#39;, &#39;katz&#39;, &#39;hits&#39;, &#39;kcore_decomposition&#39;,</span>
+<span class="sd">        &#39;sequential_vertex_coloring&#39;, &#39;max_independent_vertex_set&#39;,</span>
+<span class="sd">        &#39;label_components&#39;, &#39;label_out_component&#39;, &#39;label_largest_component&#39;.</span>
+<span class="sd">        Also, a weighted version of base feature is available by adding &quot;w_&quot; in</span>
+<span class="sd">        front of a base feature name. For exaple, weighted in-degree can be set</span>
+<span class="sd">        with &quot;w_in_degree&quot;</span>
+<span class="sd">    rel_feat_ops: list of strings, optional, (default=[&#39;mean&#39;, &#39;sum&#39;, &#39;maximum&#39;])</span>
+<span class="sd">        Relational feature operators cosidered for learning. Current</span>
+<span class="sd">        implmentation supports: &#39;mean&#39;, &#39;sum&#39;, &#39;maximum&#39;, &#39;hadamard&#39;, &#39;lp_norm&#39;,</span>
+<span class="sd">        &#39;rbf&#39;. However, &#39;hadamard&#39;, &#39;lp_norm&#39;, &#39;rbf&#39; are unstable to use.</span>
+<span class="sd">    nbr_types: list of strings, optional, (default=[&#39;in&#39;, &#39;out&#39;, &#39;all&#39;])</span>
+<span class="sd">        Neighborhood types cosidered for learning. &#39;in&#39;, &#39;out&#39;, &#39;all&#39; can be set.</span>
+<span class="sd">    ego_dist: int, optional, (default=3)</span>
+<span class="sd">        The maximum distance/# of hops to be used when computing egonet features.</span>
+<span class="sd">    lambda_value: float, optional, (default=0.9)</span>
+<span class="sd">        The feature similarity threshold. Bigger lambda_value produces more</span>
+<span class="sd">        features (0.0: filter out all egonet features, 1.0: keep all egonet</span>
+<span class="sd">        features)</span>
+<span class="sd">    diffusion_iter: int, optional, (default=0)</span>
+<span class="sd">        The number of iterations where feature diffusion is applied.</span>
+<span class="sd">    transform_method: string, optional, (default=&#39;log_binning&#39;)</span>
+<span class="sd">        A method for transforming the original features. Currently, only</span>
+<span class="sd">        &#39;log_binning&#39; is supported. If transform_method is not &#39;log_binning&#39;,</span>
+<span class="sd">        no transformation is applied.</span>
+<span class="sd">    log_binning_alpha: float, optional, (default=0.5)</span>
+<span class="sd">        Ratio of bin width to the base bin width used for each bin. For example,</span>
+<span class="sd">        if values are from 0 to 100 and log_binning_alpha = 0.8, the first bin</span>
+<span class="sd">        is from 0-80, the next bin is 80-96, and so on.</span>
+<span class="sd">        log_binning_alpha must be 0.0&lt; log_binning_alpha &lt; 1.0.</span>
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X: array_like, shape(n_nodes, n_features)</span>
+<span class="sd">        Learned feature matrix after applying fit().</span>
+<span class="sd">    feat_defs: list of lists of string</span>
+<span class="sd">        Learned features&#39; definisitons after applying fit(). i-th list of</span>
+<span class="sd">        strings correspond to i-egonet features&#39; definitions.</span>
+<span class="sd">    base_feat_defs: list of strings</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    rel_feat_ops: list of strings</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    nbr_types: list of strings</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    ego_dist: int</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    lambda_value: float</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    diffusion_iter: int</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    transform_method: string</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    log_binning_alpha: float</span>
+<span class="sd">        Access to the parameter.</span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import graph_tool.all as gt</span>
+<span class="sd">    &gt;&gt;&gt; from deepgl import DeepGL</span>
+
+<span class="sd">    &gt;&gt;&gt; # Data from http://www.sociopatterns.org/datasets/primary-school-cumulative-networks/</span>
+<span class="sd">    &gt;&gt;&gt; g1 = gt.load_graph(&#39;./data/school_day2.xml.gz&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; # DeepGL setting</span>
+<span class="sd">    &gt;&gt;&gt; deepgl = DeepGL(base_feat_defs=[</span>
+<span class="sd">    ...     &#39;total_degree&#39;, &#39;eigenvector&#39;, &#39;katz&#39;, &#39;pagerank&#39;, &#39;closeness&#39;,</span>
+<span class="sd">    ...     &#39;betweenness&#39;, &#39;gender&#39;</span>
+<span class="sd">    ... ],</span>
+<span class="sd">    ...                 ego_dist=3,</span>
+<span class="sd">    ...                 nbr_types=[&#39;all&#39;],</span>
+<span class="sd">    ...                 lambda_value=0.7,</span>
+<span class="sd">    ...                 transform_method=&#39;log_binning&#39;)</span>
+
+<span class="sd">    &gt;&gt;&gt; # network representation learing with DeepGL</span>
+<span class="sd">    &gt;&gt;&gt; X1 = deepgl.fit_transform(g1)</span>
+
+<span class="sd">    &gt;&gt;&gt; # results</span>
+<span class="sd">    &gt;&gt;&gt; print(X1)</span>
+<span class="sd">    &gt;&gt;&gt; print(X1.shape)</span>
+<span class="sd">    &gt;&gt;&gt; for nth_layer_feat_def in deepgl.feat_defs:</span>
+<span class="sd">    ...     print(nth_layer_feat_def)</span>
+
+<span class="sd">    &gt;&gt;&gt; # transfer/inductive learning example</span>
+<span class="sd">    &gt;&gt;&gt; g2 = gt.load_graph(&#39;./data/school_day1.xml.gz&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; X2 = deepgl.transform(g2)</span>
+
+<span class="sd">    &gt;&gt;&gt; # results</span>
+<span class="sd">    &gt;&gt;&gt; print(X2)</span>
+<span class="sd">    &gt;&gt;&gt; print(X2.shape)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">base_feat_defs</span><span class="o">=</span><span class="p">[</span>
+                <span class="s1">&#39;in_degree&#39;</span><span class="p">,</span> <span class="s1">&#39;out_degree&#39;</span><span class="p">,</span> <span class="s1">&#39;total_degree&#39;</span><span class="p">,</span> <span class="s1">&#39;pagerank&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;kcore_decomposition&#39;</span>
+            <span class="p">],</span>
+            <span class="n">rel_feat_ops</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;maximum&#39;</span><span class="p">],</span>
+            <span class="n">nbr_types</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">],</span>
+            <span class="n">ego_dist</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">lambda_value</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>  <span class="c1"># bigger lambda makes more features</span>
+            <span class="n">diffusion_iter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">transform_method</span><span class="o">=</span><span class="s1">&#39;log_binning&#39;</span><span class="p">,</span>
+            <span class="n">log_binning_alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="c1"># Note: removed &#39;hadamard&#39; from rel_feat_ops (it&#39;s problemetic now)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_feat_defs</span> <span class="o">=</span> <span class="n">base_feat_defs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rel_feat_ops</span> <span class="o">=</span> <span class="n">rel_feat_ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbr_types</span> <span class="o">=</span> <span class="n">nbr_types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_dist</span> <span class="o">=</span> <span class="n">ego_dist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lambda_value</span> <span class="o">=</span> <span class="n">lambda_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_iter</span> <span class="o">=</span> <span class="n">diffusion_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform_method</span> <span class="o">=</span> <span class="n">transform_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_binning_alpha</span> <span class="o">=</span> <span class="n">log_binning_alpha</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="DeepGL.fit_transform"><a class="viewcode-back" href="../deepgl.html#deepgl.DeepGL.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Apply fit (i.e., process learning procedures) and then return self.X.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g: graph-tool graph object</span>
+<span class="sd">            A graph to be extracted features.</span>
+<span class="sd">        Return</span>
+<span class="sd">        ----------</span>
+<span class="sd">        self.X: array_like, shape(n_nodes, n_features)</span>
+<span class="sd">            Learned feature matrix after applying fit().</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_base_feats</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform_method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_search_rel_func_space</span><span class="p">(</span><span class="n">g</span><span class="p">,</span>
+                                    <span class="n">diffusion_iter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion_iter</span><span class="p">,</span>
+                                    <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform_method</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span></div>
+
+<div class="viewcode-block" id="DeepGL.fit"><a class="viewcode-back" href="../deepgl.html#deepgl.DeepGL.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Apply fit (i.e., process learning procedures).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g: graph-tool graph object</span>
+<span class="sd">            A graph to be extracted features.</span>
+<span class="sd">        Return</span>
+<span class="sd">        ----------</span>
+<span class="sd">        self</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_base_feats</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform_method</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_search_rel_func_space</span><span class="p">(</span><span class="n">g</span><span class="p">,</span>
+                                    <span class="n">diffusion_iter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion_iter</span><span class="p">,</span>
+                                    <span class="n">transform</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transform_method</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="DeepGL.transform"><a class="viewcode-back" href="../deepgl.html#deepgl.DeepGL.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">g</span><span class="p">,</span>
+                  <span class="n">feat_defs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">diffusion_iter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">transform_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">log_binning_alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Apply transform based on the learned feature definitions (i.e.,</span>
+<span class="sd">        applying transfer learning to a different input graph).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        g: graph-tool graph object</span>
+<span class="sd">            A graph to be extracted features.</span>
+<span class="sd">        feat_defs: list of strings, optional, (default=None)</span>
+<span class="sd">            Feature definitions to be used for producing features. If None,</span>
+<span class="sd">            self.feat_defs learned by fitting is used.</span>
+<span class="sd">        diffusion_iter: float, optional, (default=None)</span>
+<span class="sd">            The number of iterations where feature diffusion is applied. If</span>
+<span class="sd">            None, self.diffusion_iter is used.</span>
+<span class="sd">        transform_method: string, optional, (default=None)</span>
+<span class="sd">            A method for transforming the original features. If None,</span>
+<span class="sd">            self.transform_method is used.</span>
+<span class="sd">        log_binning_alpha: float, optional, (default=None)</span>
+<span class="sd">            Ratio of bin width to the base bin width used for each bin.</span>
+<span class="sd">            log_binning_alpha must be 0.0&lt; log_binning_alpha &lt; 1.0. If None,</span>
+<span class="sd">            self.log_binning_alpha is used.</span>
+<span class="sd">        Return</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: array_like, shape(n_nodes, n_features)</span>
+<span class="sd">            Feature matrix.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">feat_defs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">feat_defs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_feat_defs</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">diffusion_iter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">diffusion_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_iter</span>
+        <span class="k">if</span> <span class="n">transform_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">transform_method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_method</span>
+        <span class="k">if</span> <span class="n">log_binning_alpha</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log_binning_alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_binning_alpha</span>
+
+        <span class="n">feat_defs_computed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">feat_def</span> <span class="ow">in</span> <span class="n">feat_defs</span><span class="p">:</span>
+            <span class="n">feat_comps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_def_to_feat_comps</span><span class="p">(</span><span class="n">feat_def</span><span class="p">)</span>
+
+            <span class="n">tmp_feat_def</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">feat_comp</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">feat_comps</span><span class="p">):</span>
+                <span class="n">prev_tmp_feat_def</span> <span class="o">=</span> <span class="n">tmp_feat_def</span>
+                <span class="n">feat_op</span> <span class="o">=</span> <span class="n">feat_comp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nbr_type</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">feat_comp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">nbr_type</span> <span class="o">=</span> <span class="n">feat_comp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># base feature</span>
+                <span class="k">if</span> <span class="n">nbr_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">tmp_feat_def</span> <span class="o">=</span> <span class="n">feat_op</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">tmp_feat_def</span> <span class="ow">in</span> <span class="n">feat_defs_computed</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_comp_base_feat</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">feat_op</span><span class="p">)</span>
+                <span class="c1"># rel operators</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">tmp_feat_def</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_feat_def</span><span class="p">(</span><span class="n">feat_op</span><span class="p">,</span> <span class="n">nbr_type</span><span class="p">,</span>
+                                                      <span class="n">prev_tmp_feat_def</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">tmp_feat_def</span> <span class="ow">in</span> <span class="n">feat_defs_computed</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_comp_rel_op_feat</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">feat_op</span><span class="p">,</span> <span class="n">nbr_type</span><span class="p">,</span>
+                                               <span class="n">prev_tmp_feat_def</span><span class="p">)</span>
+
+                <span class="n">feat_defs_computed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_feat_def</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">g</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">feat_defs</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feat_def</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feat_defs</span><span class="p">):</span>
+            <span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">feat_def</span><span class="p">]</span><span class="o">.</span><span class="n">a</span>
+
+        <span class="n">Processing</span><span class="o">.</span><span class="n">feat_diffusion</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="n">diffusion_iter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">transform_method</span> <span class="o">==</span> <span class="s1">&#39;log_binning&#39;</span><span class="p">:</span>
+            <span class="n">Processing</span><span class="p">()</span><span class="o">.</span><span class="n">log_binning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">log_binning_alpha</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span></div>
+
+<div class="viewcode-block" id="DeepGL.get_feat_defs"><a class="viewcode-back" href="../deepgl.html#deepgl.DeepGL.get_feat_defs">[docs]</a>    <span class="k">def</span> <span class="nf">get_feat_defs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return (flattened) feature definitions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        flatten: boolean, optional, (default=True)</span>
+<span class="sd">            If True, flattened feature definitions are returned. Otherwise,</span>
+<span class="sd">            feture definitions learned by fitting are returned as they are.</span>
+<span class="sd">        Return</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feat_defs: list of (lists of) string</span>
+<span class="sd">            Feature definitions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">flatten</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ith_feat_defs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">ith_feat_defs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="DeepGL.get_related_subgraph"><a class="viewcode-back" href="../deepgl.html#deepgl.DeepGL.get_related_subgraph">[docs]</a>    <span class="k">def</span> <span class="nf">get_related_subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">feat_def</span><span class="p">):</span>
+        <span class="n">filter_prop</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">new_vertex_property</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">filter_prop</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="n">feat_comps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feat_def_to_feat_comps</span><span class="p">(</span><span class="n">feat_def</span><span class="p">)</span>
+        <span class="n">related_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+        <span class="n">prev_nbrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">feat_comp</span> <span class="ow">in</span> <span class="n">feat_comps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">feat_comp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">prev_nbrs</span><span class="p">:</span>
+                    <span class="n">nbr_type</span> <span class="o">=</span> <span class="n">feat_comp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">nbrs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;NeighborOp().&#39;</span> <span class="o">+</span> <span class="n">nbr_type</span> <span class="o">+</span>
+                                     <span class="s1">&#39;_nbr(g, u)&#39;</span><span class="p">))</span>
+                    <span class="n">related_nodes</span> <span class="o">+=</span> <span class="n">nbrs</span>
+                    <span class="n">prev_nbrs</span> <span class="o">=</span> <span class="n">nbrs</span>
+        <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">related_nodes</span><span class="p">):</span>
+            <span class="n">filter_prop</span><span class="p">[</span><span class="n">u</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">gv</span> <span class="o">=</span> <span class="n">gt</span><span class="o">.</span><span class="n">GraphView</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">vfilt</span><span class="o">=</span><span class="n">filter_prop</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gv</span></div>
+
+    <span class="k">def</span> <span class="nf">_comp_base_feat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">base_feat_def</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute and store base feature by using a method provided by graph-tool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">gt_measures</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># from graph-tool&#39;s centrarity</span>
+            <span class="s1">&#39;pagerank&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;betweenness&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;closeness&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;eigenvector&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;katz&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;hits&#39;</span><span class="p">,</span>
+            <span class="c1"># from graph-tool&#39;s topology</span>
+            <span class="s1">&#39;kcore_decomposition&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;sequential_vertex_coloring&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;max_independent_vertex_set&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;label_components&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;label_out_component&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;label_largest_component&#39;</span>
+        <span class="p">]</span>
+
+        <span class="c1"># judge whether weighted feature or not</span>
+        <span class="n">eweight</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">b_feat</span> <span class="o">=</span> <span class="n">base_feat_def</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_feat_def</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">base_feat_def</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;w_&#39;</span><span class="p">:</span>
+            <span class="n">eweight</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">edge_properties</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+            <span class="n">b_feat</span> <span class="o">=</span> <span class="n">base_feat_def</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s1">&#39;in_degree&#39;</span> <span class="ow">or</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s1">&#39;out_degree&#39;</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">new_vertex_property</span><span class="p">(</span>
+                <span class="s1">&#39;double&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">vertices</span><span class="p">():</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">][</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;v.&quot;</span> <span class="o">+</span> <span class="n">b_feat</span><span class="p">)(</span>
+                    <span class="n">weight</span><span class="o">=</span><span class="n">eweight</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s1">&#39;total_degree&#39;</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">new_vertex_property</span><span class="p">(</span>
+                <span class="s1">&#39;double&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">vertices</span><span class="p">():</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">][</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">in_degree</span><span class="p">(</span>
+                    <span class="n">weight</span><span class="o">=</span><span class="n">eweight</span><span class="p">)</span> <span class="o">+</span> <span class="n">v</span><span class="o">.</span><span class="n">out_degree</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">eweight</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">b_feat</span> <span class="ow">in</span> <span class="n">gt_measures</span> <span class="ow">and</span> <span class="n">eweight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;gt.&#39;</span> <span class="o">+</span> <span class="n">b_feat</span><span class="p">)(</span><span class="n">g</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;betweenness&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;eigenvector&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;hits&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># authority value TODO: hub value</span>
+            <span class="k">elif</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;label_components&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
+        <span class="k">elif</span> <span class="n">b_feat</span> <span class="ow">in</span> <span class="n">gt_measures</span> <span class="ow">and</span> <span class="n">eweight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;gt.&#39;</span> <span class="o">+</span> <span class="n">b_feat</span><span class="p">)(</span><span class="n">g</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">eweight</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;betweenness&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;eigenvector&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">b_feat</span> <span class="o">==</span> <span class="s2">&quot;hits&quot;</span><span class="p">:</span>
+                <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># authority value TODO: hub value</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">]</span> <span class="o">=</span> <span class="n">vals</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">base_feat_def</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;base feature, &#39;</span> <span class="o">+</span> <span class="n">base_feat_def</span> <span class="o">+</span>
+                      <span class="s1">&#39;, is set which is not supported in graph-tool. Load &#39;</span> <span class="o">+</span>
+                      <span class="n">base_feat_def</span> <span class="o">+</span>
+                      <span class="s1">&#39;as a vertex_properties before using DeepGL&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_base_feats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;log_binning&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute and store all base features</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">g</span><span class="o">.</span><span class="n">num_vertices</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_feat_defs</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">base_feat_defs</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feat_def</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_feat_defs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_comp_base_feat</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">feat_def</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">feat_def</span><span class="p">]</span><span class="o">.</span><span class="n">a</span>
+
+        <span class="k">if</span> <span class="n">transform</span> <span class="o">==</span> <span class="s1">&#39;log_binning&#39;</span><span class="p">:</span>
+            <span class="n">Processing</span><span class="p">()</span><span class="o">.</span><span class="n">log_binning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_binning_alpha</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_gen_feat_def</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rel_op</span><span class="p">,</span> <span class="n">nbr_type</span><span class="p">,</span> <span class="n">prev_feat_def</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generate feature definition string from inputs</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">rel_op</span> <span class="o">+</span> <span class="s1">&#39;^&#39;</span> <span class="o">+</span> <span class="n">nbr_type</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">prev_feat_def</span>
+
+    <span class="k">def</span> <span class="nf">_comp_rel_op_feat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">rel_op</span><span class="p">,</span> <span class="n">nbr_type</span><span class="p">,</span> <span class="n">prev_feat_def</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Compute and store new features by applying relational operators</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">new_feat_def</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_feat_def</span><span class="p">(</span><span class="n">rel_op</span><span class="p">,</span> <span class="n">nbr_type</span><span class="p">,</span> <span class="n">prev_feat_def</span><span class="p">)</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">new_feat_def</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">new_vertex_property</span><span class="p">(</span><span class="s1">&#39;double&#39;</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">prev_feat_def</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">vertices</span><span class="p">():</span>
+            <span class="n">nbrs</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;NeighborOp().&#39;</span> <span class="o">+</span> <span class="n">nbr_type</span> <span class="o">+</span> <span class="s1">&#39;_nbr(g, v)&#39;</span><span class="p">)</span>
+            <span class="n">feat_val</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;RelFeatOp().&#39;</span> <span class="o">+</span> <span class="n">rel_op</span> <span class="o">+</span> <span class="s1">&#39;(nbrs, x)&#39;</span><span class="p">)</span>
+            <span class="c1"># to avoid the result &gt; inf (this happens when using hadamard)</span>
+            <span class="n">feat_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">feat_val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">new_feat_def</span><span class="p">][</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat_val</span>
+
+        <span class="k">return</span> <span class="n">new_feat_def</span>
+
+    <span class="k">def</span> <span class="nf">_search_rel_func_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                               <span class="n">g</span><span class="p">,</span>
+                               <span class="n">diffusion_iter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                               <span class="n">transform</span><span class="o">=</span><span class="s1">&#39;log_binning&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Searching the relational function space (Sec. 2.3, Rossi et al., 2018)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">n_rel_feat_ops</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rel_feat_ops</span><span class="p">)</span>
+        <span class="n">n_nbr_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbr_types</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_dist</span><span class="p">):</span>
+            <span class="n">prev_feat_defs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span><span class="p">[</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_feat_defs</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rel_feat_ops</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">nbr_type</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbr_types</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">prev_feat_def</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">prev_feat_defs</span><span class="p">):</span>
+                        <span class="n">new_feat_def</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comp_rel_op_feat</span><span class="p">(</span>
+                            <span class="n">g</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">nbr_type</span><span class="p">,</span> <span class="n">prev_feat_def</span><span class="p">)</span>
+
+                        <span class="n">new_feat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+                            <span class="n">g</span><span class="o">.</span><span class="n">vertex_properties</span><span class="p">[</span><span class="n">new_feat_def</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">new_feat</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">new_feat_defs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_feat_def</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_feat_defs</span><span class="p">)</span>
+
+            <span class="n">Processing</span><span class="o">.</span><span class="n">feat_diffusion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="n">diffusion_iter</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">transform</span> <span class="o">==</span> <span class="s1">&#39;log_binning&#39;</span><span class="p">:</span>
+                <span class="n">Processing</span><span class="p">()</span><span class="o">.</span><span class="n">log_binning</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_binning_alpha</span><span class="p">)</span>
+
+            <span class="c1"># feature pruning</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span> <span class="o">=</span> <span class="n">Processing</span><span class="p">()</span><span class="o">.</span><span class="n">prune_feats</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">feat_defs</span><span class="p">,</span> <span class="n">lambda_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lambda_value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_feat_def_to_feat_comps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feat_def</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; From feature definition string, generate a list of pairs of</span>
+<span class="sd">        a relational feature operator and a neigbor type.</span>
+<span class="sd">        e.g., &#39;mean^in-mean^in-in_degree&#39; =&gt; [[&#39;mean&#39;, &#39;in&#39;], [&#39;mean&#39;, &#39;in&#39;], [&#39;in_degree&#39;]]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">feat_comps</span> <span class="o">=</span> <span class="n">feat_def</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">feat_comp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feat_comps</span><span class="p">):</span>
+            <span class="n">feat_comps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">feat_comp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">feat_comps</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Takanori Fujiwara
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

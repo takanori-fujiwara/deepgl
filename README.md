@@ -1,4 +1,4 @@
-## DeepGL (Python Implementation using graph-tool)
+## Python implementation of DeepGL
 
 About
 -----
@@ -31,3 +31,4 @@ Setup
 Usage
 -----
 * Import installed modules from python (e.g., `from deepgl import DeepGL`). See sample.py for examples.
+* For detailed documentations, please see doc/index.html or directly see comments in deepgl.py.

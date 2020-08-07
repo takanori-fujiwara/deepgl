@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>deepgl module &mdash; deepgl  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to deepgl’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> deepgl
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">deepgl module</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">deepgl</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>deepgl module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/deepgl.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-deepgl">
+<span id="deepgl-module"></span><h1>deepgl module<a class="headerlink" href="#module-deepgl" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="deepgl.DeepGL">
+<em class="property">class </em><code class="sig-prename descclassname">deepgl.</code><code class="sig-name descname">DeepGL</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_feat_defs</span><span class="o">=</span><span class="default_value">['in_degree', 'out_degree', 'total_degree', 'pagerank', 'kcore_decomposition']</span></em>, <em class="sig-param"><span class="n">rel_feat_ops</span><span class="o">=</span><span class="default_value">['mean', 'sum', 'maximum']</span></em>, <em class="sig-param"><span class="n">nbr_types</span><span class="o">=</span><span class="default_value">['in', 'out', 'all']</span></em>, <em class="sig-param"><span class="n">ego_dist</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">lambda_value</span><span class="o">=</span><span class="default_value">0.9</span></em>, <em class="sig-param"><span class="n">diffusion_iter</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">transform_method</span><span class="o">=</span><span class="default_value">'log_binning'</span></em>, <em class="sig-param"><span class="n">log_binning_alpha</span><span class="o">=</span><span class="default_value">0.5</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepgl.html#DeepGL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepgl.DeepGL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>DeepGL from Rossi et al., 2018 (<a class="reference external" href="https://ieeexplore.ieee.org/document/8519335">https://ieeexplore.ieee.org/document/8519335</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_feat_defs</strong> (<em>list of strings</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=</em><em>[</em><em>'in_degree'</em><em>, </em><em>'out_degree'</em><em>, </em><em>'total_degree'</em><em>, </em><em>'pagerank'</em><em>, </em><em>'kcore_decomposition'</em><em>]</em><em>)</em>) – Base features considered for network representation learning. Current
+implementation supports base features available in graph-tool:
+‘in_degree’, ‘out_degree’, ‘total_degree’, ‘pagerank’, ‘betweenness’,
+‘closeness’, ‘eigenvector’, ‘katz’, ‘hits’, ‘kcore_decomposition’,
+‘sequential_vertex_coloring’, ‘max_independent_vertex_set’,
+‘label_components’, ‘label_out_component’, ‘label_largest_component’.
+Also, a weighted version of base feature is available by adding “<a href="#id1"><span class="problematic" id="id2">w_</span></a>” in
+front of a base feature name. For exaple, weighted in-degree can be set
+with “w_in_degree”</p></li>
+<li><p><strong>rel_feat_ops</strong> (<em>list of strings</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=</em><em>[</em><em>'mean'</em><em>, </em><em>'sum'</em><em>, </em><em>'maximum'</em><em>]</em><em>)</em>) – Relational feature operators cosidered for learning. Current
+implmentation supports: ‘mean’, ‘sum’, ‘maximum’, ‘hadamard’, ‘lp_norm’,
+‘rbf’. However, ‘hadamard’, ‘lp_norm’, ‘rbf’ are unstable to use.</p></li>
+<li><p><strong>nbr_types</strong> (<em>list of strings</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=</em><em>[</em><em>'in'</em><em>, </em><em>'out'</em><em>, </em><em>'all'</em><em>]</em><em>)</em>) – Neighborhood types cosidered for learning. ‘in’, ‘out’, ‘all’ can be set.</p></li>
+<li><p><strong>ego_dist</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=3</em><em>)</em>) – The maximum distance/# of hops to be used when computing egonet features.</p></li>
+<li><p><strong>lambda_value</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=0.9</em><em>)</em>) – The feature similarity threshold. Bigger lambda_value produces more
+features (0.0: filter out all egonet features, 1.0: keep all egonet
+features)</p></li>
+<li><p><strong>diffusion_iter</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=0</em><em>)</em>) – The number of iterations where feature diffusion is applied.</p></li>
+<li><p><strong>transform_method</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default='log_binning'</em><em>)</em>) – A method for transforming the original features. Currently, only
+‘log_binning’ is supported. If transform_method is not ‘log_binning’,
+no transformation is applied.</p></li>
+<li><p><strong>log_binning_alpha</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=0.5</em><em>)</em>) – Ratio of bin width to the base bin width used for each bin. For example,
+if values are from 0 to 100 and log_binning_alpha = 0.8, the first bin
+is from 0-80, the next bin is 80-96, and so on.
+log_binning_alpha must be 0.0&lt; log_binning_alpha &lt; 1.0.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.X">
+<code class="sig-name descname">X</code><a class="headerlink" href="#deepgl.DeepGL.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learned feature matrix after applying fit().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>array_like, shape(n_nodes, n_features)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.feat_defs">
+<code class="sig-name descname">feat_defs</code><a class="headerlink" href="#deepgl.DeepGL.feat_defs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learned features’ definisitons after applying fit(). i-th list of
+strings correspond to i-egonet features’ definitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of lists of string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.base_feat_defs">
+<code class="sig-name descname">base_feat_defs</code><a class="headerlink" href="#deepgl.DeepGL.base_feat_defs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.rel_feat_ops">
+<code class="sig-name descname">rel_feat_ops</code><a class="headerlink" href="#deepgl.DeepGL.rel_feat_ops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.nbr_types">
+<code class="sig-name descname">nbr_types</code><a class="headerlink" href="#deepgl.DeepGL.nbr_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.ego_dist">
+<code class="sig-name descname">ego_dist</code><a class="headerlink" href="#deepgl.DeepGL.ego_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.lambda_value">
+<code class="sig-name descname">lambda_value</code><a class="headerlink" href="#deepgl.DeepGL.lambda_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.diffusion_iter">
+<code class="sig-name descname">diffusion_iter</code><a class="headerlink" href="#deepgl.DeepGL.diffusion_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.transform_method">
+<code class="sig-name descname">transform_method</code><a class="headerlink" href="#deepgl.DeepGL.transform_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="deepgl.DeepGL.log_binning_alpha">
+<code class="sig-name descname">log_binning_alpha</code><a class="headerlink" href="#deepgl.DeepGL.log_binning_alpha" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access to the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">graph_tool.all</span> <span class="k">as</span> <span class="nn">gt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">deepgl</span> <span class="kn">import</span> <span class="n">DeepGL</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Data from http://www.sociopatterns.org/datasets/primary-school-cumulative-networks/</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g1</span> <span class="o">=</span> <span class="n">gt</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="s1">&#39;./data/school_day2.xml.gz&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># DeepGL setting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deepgl</span> <span class="o">=</span> <span class="n">DeepGL</span><span class="p">(</span><span class="n">base_feat_defs</span><span class="o">=</span><span class="p">[</span>
+<span class="gp">... </span>    <span class="s1">&#39;total_degree&#39;</span><span class="p">,</span> <span class="s1">&#39;eigenvector&#39;</span><span class="p">,</span> <span class="s1">&#39;katz&#39;</span><span class="p">,</span> <span class="s1">&#39;pagerank&#39;</span><span class="p">,</span> <span class="s1">&#39;closeness&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s1">&#39;betweenness&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span>
+<span class="gp">... </span><span class="p">],</span>
+<span class="gp">... </span>                <span class="n">ego_dist</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="gp">... </span>                <span class="n">nbr_types</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">],</span>
+<span class="gp">... </span>                <span class="n">lambda_value</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+<span class="gp">... </span>                <span class="n">transform_method</span><span class="o">=</span><span class="s1">&#39;log_binning&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># network representation learing with DeepGL</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X1</span> <span class="o">=</span> <span class="n">deepgl</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">g1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># results</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">X1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">X1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">nth_layer_feat_def</span> <span class="ow">in</span> <span class="n">deepgl</span><span class="o">.</span><span class="n">feat_defs</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">nth_layer_feat_def</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># transfer/inductive learning example</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g2</span> <span class="o">=</span> <span class="n">gt</span><span class="o">.</span><span class="n">load_graph</span><span class="p">(</span><span class="s1">&#39;./data/school_day1.xml.gz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X2</span> <span class="o">=</span> <span class="n">deepgl</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">g2</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># results</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">X2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">X2</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="deepgl.DeepGL.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">g</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepgl.html#DeepGL.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepgl.DeepGL.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply fit (i.e., process learning procedures).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>g</strong> (<em>graph-tool graph object</em>) – A graph to be extracted features.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="deepgl.DeepGL.fit_transform">
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">g</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepgl.html#DeepGL.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepgl.DeepGL.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply fit (i.e., process learning procedures) and then return self.X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>g</strong> (<em>graph-tool graph object</em>) – A graph to be extracted features.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>self.X</strong> – Learned feature matrix after applying fit().</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like, shape(n_nodes, n_features)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="deepgl.DeepGL.get_feat_defs">
+<code class="sig-name descname">get_feat_defs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flatten</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepgl.html#DeepGL.get_feat_defs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepgl.DeepGL.get_feat_defs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return (flattened) feature definitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>flatten</strong> (<em>boolean</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=True</em><em>)</em>) – If True, flattened feature definitions are returned. Otherwise,
+feture definitions learned by fitting are returned as they are.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>feat_defs</strong> – Feature definitions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of (lists of) string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="deepgl.DeepGL.get_related_subgraph">
+<code class="sig-name descname">get_related_subgraph</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">g</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">feat_def</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepgl.html#DeepGL.get_related_subgraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepgl.DeepGL.get_related_subgraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="deepgl.DeepGL.transform">
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">g</span></em>, <em class="sig-param"><span class="n">feat_defs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">diffusion_iter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">transform_method</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">log_binning_alpha</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deepgl.html#DeepGL.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#deepgl.DeepGL.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply transform based on the learned feature definitions (i.e.,
+applying transfer learning to a different input graph).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g</strong> (<em>graph-tool graph object</em>) – A graph to be extracted features.</p></li>
+<li><p><strong>feat_defs</strong> (<em>list of strings</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=None</em><em>)</em>) – Feature definitions to be used for producing features. If None,
+self.feat_defs learned by fitting is used.</p></li>
+<li><p><strong>diffusion_iter</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=None</em><em>)</em>) – The number of iterations where feature diffusion is applied. If
+None, self.diffusion_iter is used.</p></li>
+<li><p><strong>transform_method</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=None</em><em>)</em>) – A method for transforming the original features. If None,
+self.transform_method is used.</p></li>
+<li><p><strong>log_binning_alpha</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>(</em><em>default=None</em><em>)</em>) – Ratio of bin width to the base bin width used for each bin.
+log_binning_alpha must be 0.0&lt; log_binning_alpha &lt; 1.0. If None,
+self.log_binning_alpha is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>X</strong> – Feature matrix.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array_like, shape(n_nodes, n_features)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to deepgl’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Takanori Fujiwara
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

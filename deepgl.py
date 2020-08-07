@@ -12,6 +12,102 @@ from deepgl_utils import NeighborOp, Processing, RelFeatOp
 
 
 class DeepGL():
+    '''
+    DeepGL from Rossi et al., 2018 (https://ieeexplore.ieee.org/document/8519335).
+
+    Parameters
+    ----------
+    base_feat_defs: list of strings, optional, (default=['in_degree', 'out_degree', 'total_degree', 'pagerank', 'kcore_decomposition'])
+        Base features considered for network representation learning. Current
+        implementation supports base features available in graph-tool:
+        'in_degree', 'out_degree', 'total_degree', 'pagerank', 'betweenness',
+        'closeness', 'eigenvector', 'katz', 'hits', 'kcore_decomposition',
+        'sequential_vertex_coloring', 'max_independent_vertex_set',
+        'label_components', 'label_out_component', 'label_largest_component'.
+        Also, a weighted version of base feature is available by adding "w_" in
+        front of a base feature name. For exaple, weighted in-degree can be set
+        with "w_in_degree"
+    rel_feat_ops: list of strings, optional, (default=['mean', 'sum', 'maximum'])
+        Relational feature operators cosidered for learning. Current
+        implmentation supports: 'mean', 'sum', 'maximum', 'hadamard', 'lp_norm',
+        'rbf'. However, 'hadamard', 'lp_norm', 'rbf' are unstable to use.
+    nbr_types: list of strings, optional, (default=['in', 'out', 'all'])
+        Neighborhood types cosidered for learning. 'in', 'out', 'all' can be set.
+    ego_dist: int, optional, (default=3)
+        The maximum distance/# of hops to be used when computing egonet features.
+    lambda_value: float, optional, (default=0.9)
+        The feature similarity threshold. Bigger lambda_value produces more
+        features (0.0: filter out all egonet features, 1.0: keep all egonet
+        features)
+    diffusion_iter: int, optional, (default=0)
+        The number of iterations where feature diffusion is applied.
+    transform_method: string, optional, (default='log_binning')
+        A method for transforming the original features. Currently, only
+        'log_binning' is supported. If transform_method is not 'log_binning',
+        no transformation is applied.
+    log_binning_alpha: float, optional, (default=0.5)
+        Ratio of bin width to the base bin width used for each bin. For example,
+        if values are from 0 to 100 and log_binning_alpha = 0.8, the first bin
+        is from 0-80, the next bin is 80-96, and so on.
+        log_binning_alpha must be 0.0< log_binning_alpha < 1.0.
+    Attributes
+    ----------
+    X: array_like, shape(n_nodes, n_features)
+        Learned feature matrix after applying fit().
+    feat_defs: list of lists of string
+        Learned features' definisitons after applying fit(). i-th list of
+        strings correspond to i-egonet features' definitions.
+    base_feat_defs: list of strings
+        Access to the parameter.
+    rel_feat_ops: list of strings
+        Access to the parameter.
+    nbr_types: list of strings
+        Access to the parameter.
+    ego_dist: int
+        Access to the parameter.
+    lambda_value: float
+        Access to the parameter.
+    diffusion_iter: int
+        Access to the parameter.
+    transform_method: string
+        Access to the parameter.
+    log_binning_alpha: float
+        Access to the parameter.
+    Examples
+    --------
+    >>> import graph_tool.all as gt
+    >>> from deepgl import DeepGL
+
+    >>> # Data from http://www.sociopatterns.org/datasets/primary-school-cumulative-networks/
+    >>> g1 = gt.load_graph('./data/school_day2.xml.gz')
+
+    >>> # DeepGL setting
+    >>> deepgl = DeepGL(base_feat_defs=[
+    ...     'total_degree', 'eigenvector', 'katz', 'pagerank', 'closeness',
+    ...     'betweenness', 'gender'
+    ... ],
+    ...                 ego_dist=3,
+    ...                 nbr_types=['all'],
+    ...                 lambda_value=0.7,
+    ...                 transform_method='log_binning')
+
+    >>> # network representation learing with DeepGL
+    >>> X1 = deepgl.fit_transform(g1)
+
+    >>> # results
+    >>> print(X1)
+    >>> print(X1.shape)
+    >>> for nth_layer_feat_def in deepgl.feat_defs:
+    ...     print(nth_layer_feat_def)
+
+    >>> # transfer/inductive learning example
+    >>> g2 = gt.load_graph('./data/school_day1.xml.gz')
+    >>> X2 = deepgl.transform(g2)
+
+    >>> # results
+    >>> print(X2)
+    >>> print(X2.shape)
+    '''
     def __init__(
             self,
             base_feat_defs=[
@@ -39,6 +135,18 @@ class DeepGL():
         self.feat_defs = None
 
     def fit_transform(self, g):
+        '''
+        Apply fit (i.e., process learning procedures) and then return self.X.
+
+        Parameters
+        ----------
+        g: graph-tool graph object
+            A graph to be extracted features.
+        Return
+        ----------
+        self.X: array_like, shape(n_nodes, n_features)
+            Learned feature matrix after applying fit().
+        '''
         self._prepare_base_feats(g, transform=self.transform_method)
         self._search_rel_func_space(g,
                                     diffusion_iter=self.diffusion_iter,
@@ -47,6 +155,17 @@ class DeepGL():
         return self.X
 
     def fit(self, g):
+        '''
+        Apply fit (i.e., process learning procedures).
+
+        Parameters
+        ----------
+        g: graph-tool graph object
+            A graph to be extracted features.
+        Return
+        ----------
+        self
+        '''
         self._prepare_base_feats(g, transform=self.transform_method)
         self._search_rel_func_space(g,
                                     diffusion_iter=self.diffusion_iter,
@@ -59,6 +178,32 @@ class DeepGL():
                   diffusion_iter=None,
                   transform_method=None,
                   log_binning_alpha=None):
+        '''
+        Apply transform based on the learned feature definitions (i.e.,
+        applying transfer learning to a different input graph).
+
+        Parameters
+        ----------
+        g: graph-tool graph object
+            A graph to be extracted features.
+        feat_defs: list of strings, optional, (default=None)
+            Feature definitions to be used for producing features. If None,
+            self.feat_defs learned by fitting is used.
+        diffusion_iter: float, optional, (default=None)
+            The number of iterations where feature diffusion is applied. If
+            None, self.diffusion_iter is used.
+        transform_method: string, optional, (default=None)
+            A method for transforming the original features. If None,
+            self.transform_method is used.
+        log_binning_alpha: float, optional, (default=None)
+            Ratio of bin width to the base bin width used for each bin.
+            log_binning_alpha must be 0.0< log_binning_alpha < 1.0. If None,
+            self.log_binning_alpha is used.
+        Return
+        ----------
+        X: array_like, shape(n_nodes, n_features)
+            Feature matrix.
+        '''
         if feat_defs is None:
             feat_defs = self.get_feat_defs(flatten=True)
         if diffusion_iter is None:
@@ -106,6 +251,19 @@ class DeepGL():
         return X
 
     def get_feat_defs(self, flatten=True):
+        '''
+        Return (flattened) feature definitions.
+
+        Parameters
+        ----------
+        flatten: boolean, optional, (default=True)
+            If True, flattened feature definitions are returned. Otherwise,
+            feture definitions learned by fitting are returned as they are.
+        Return
+        ----------
+        feat_defs: list of (lists of) string
+            Feature definitions.
+        '''
         result = []
         if flatten:
             for ith_feat_defs in self.feat_defs:
