@@ -13,14 +13,15 @@ Requirements
 -----
 * Python3
 * graph-tool (https://graph-tool.skewed.de/)
-  * Currently, graph-tool's server is down and cannot install.
 * Note: Tested on macOS Catalina and Ubuntu 20.0.4 LTS.
 ******
 
 Setup
 -----
-* Install graph-tool (https://graph-tool.skewed.de/)
-  * Currently, graph-tool's server is down and cannot install.
+* Install graph-tool (https://git.skewed.de/count0/graph-tool/-/wikis/installation-instructions)
+  * For example, macOS X with Homebrew,
+
+    `brew install graph-tool`
 
 * Install with pip3. Move to the directory of this repository. Then,
 

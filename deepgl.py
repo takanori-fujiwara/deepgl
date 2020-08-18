@@ -55,7 +55,7 @@ class DeepGL():
     X: array_like, shape(n_nodes, n_features)
         Learned feature matrix after applying fit().
     feat_defs: list of lists of string
-        Learned features' definisitons after applying fit(). i-th list of
+        Learned features' definitions after applying fit(). i-th list of
         strings correspond to i-egonet features' definitions.
     base_feat_defs: list of strings
         Access to the parameter.
