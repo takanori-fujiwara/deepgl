@@ -26,7 +26,11 @@ class DeepGL():
         'label_components', 'label_out_component', 'label_largest_component'.
         Also, a weighted version of base feature is available by adding "w_" in
         front of a base feature name. For exaple, weighted in-degree can be set
-        with "w_in_degree"
+        with "w_in_degree".
+        Node attributes can be included as well. To include node attributes,
+        indicate vertex property names used in input graph-tool graph objects.
+        For example, when graph objects have "gender" vertex property, you can
+        include it as base_feat_defs with "gender" (see sample.py). 
     rel_feat_ops: list of strings, optional, (default=['mean', 'sum', 'maximum'])
         Relational feature operators cosidered for learning. Current
         implmentation supports: 'mean', 'sum', 'maximum', 'hadamard', 'lp_norm',
