@@ -11,6 +11,7 @@ from deepgl_utils import NeighborOp, Processing, RelFeatOp
 # TODO: support summation and multiplication of relational functions later
 
 
+########## log problem, n_components limit
 class DeepGL():
     '''
     DeepGL from Rossi et al., 2018 (https://ieeexplore.ieee.org/document/8519335).
@@ -30,7 +31,7 @@ class DeepGL():
         Node attributes can be included as well. To include node attributes,
         indicate vertex property names used in input graph-tool graph objects.
         For example, when graph objects have "gender" vertex property, you can
-        include it as base_feat_defs with "gender" (see sample.py). 
+        include it as base_feat_defs with "gender" (see sample.py).
     rel_feat_ops: list of strings, optional, (default=['mean', 'sum', 'maximum'])
         Relational feature operators cosidered for learning. Current
         implmentation supports: 'mean', 'sum', 'maximum', 'hadamard', 'lp_norm',
@@ -250,7 +251,7 @@ class DeepGL():
 
         Processing.feat_diffusion(X, g, iter=diffusion_iter)
         if transform_method == 'log_binning':
-            Processing().log_binning(self.X, alpha=log_binning_alpha)
+            Processing().log_binning(X, alpha=log_binning_alpha)
 
         return X
 
