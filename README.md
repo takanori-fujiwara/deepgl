@@ -13,7 +13,9 @@ Requirements
 -----
 * Python3
 * graph-tool (https://graph-tool.skewed.de/)
-* Note: Tested on macOS Catalina and Ubuntu 20.0.4 LTS.
+* OS: macOS or Linux
+  * Note: Tested on macOS BigSur and Ubuntu 20.0.4 LTS.
+  * Windows is not supported because graph-tool is not available for Windows.
 ******
 
 Setup
