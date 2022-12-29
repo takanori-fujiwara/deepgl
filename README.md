@@ -3,7 +3,10 @@
 About
 -----
 * Python3 implemetation of DeepGL.
-  * Rossi et al., Deep Inductive Graph Representation Learning, IEEE TKDE, 2018.
+  * This package is implemented for:
+    Fujiwara et al., Network Comparison with Interpretable Contrastive Network Representation Learning, JDSSV, 2022.
+  * Related repository: Contrastive Network Representation Learning (cNRL), https://github.com/takanori-fujiwara/cnrl
+  * Original DeepGL paper: Rossi et al., Deep Inductive Graph Representation Learning, IEEE TKDE, 2018.
 
 * Current implementation supports a major portion of DeepGL. However, for example, local graphlet count-based features are not supported. These functionality will be tentatively implemented in the future.
 
@@ -35,3 +38,9 @@ Usage
 -----
 * Import installed modules from python (e.g., `from deepgl import DeepGL`). See sample.py for examples.
 * For detailed documentations, please see doc/index.html or directly see comments in deepgl.py.
+
+******
+
+How to Cite
+----
+* If you use this implementation of DeepGL, please consider to cite: Fujiwara et al., Network Comparison with Interpretable Contrastive Network Representation Learning, JDSSV, 2022.
