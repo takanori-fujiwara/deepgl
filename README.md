@@ -17,14 +17,14 @@ Requirements
 * Python3
 * graph-tool (https://graph-tool.skewed.de/)
 * OS: macOS or Linux
-  * Note: Tested on macOS BigSur and Ubuntu 20.0.4 LTS.
+  * Note: Tested on macOS Ventura and Ubuntu 20.0.4 LTS.
   * Windows is not supported because graph-tool is not available for Windows.
 ******
 
 Setup
 -----
 * Install graph-tool (https://git.skewed.de/count0/graph-tool/-/wikis/installation-instructions)
-  * For example, macOS X with Homebrew,
+  * For example, macOS with Homebrew,
 
     `brew install graph-tool`
 
