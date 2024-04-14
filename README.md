@@ -17,16 +17,35 @@ Requirements
 * Python3
 * graph-tool (https://graph-tool.skewed.de/)
 * OS: macOS or Linux
-  * Note: Tested on macOS Ventura and Ubuntu 20.0.4 LTS.
+  * Note: Tested on macOS Sonoma and Ubuntu 20.0.4 LTS.
   * Windows is not supported because graph-tool is not available for Windows.
 ******
 
 Setup
 -----
-* Install graph-tool (https://git.skewed.de/count0/graph-tool/-/wikis/installation-instructions)
-  * For example, macOS with Homebrew,
+* Install graph-tool (https://graph-tool.skewed.de/installation.html)
+  * For example, macOS with Homebrew (when not using virtual environment),
 
     `brew install graph-tool`
+  
+  * When using virtual environment, there are two options:
+  
+    - Option 1. Follow the graph-tool instruction (need a lot of time for compiling graph-tool).
+
+      - Check a section of "Installing in a virtualenv".
+
+      - graph-tool's instruction doesn't support Python3.12. For Python3.12, before the configure step (i.e., ./configure --prefix=$HOME/.local), run commands below:
+
+        `pip3 install setuptools pycairo`
+
+    - Option 2. Use virtual environment with "include-system-site-packages = true"
+      
+      - Either make venv with --system-site-packages option (e.g., `python3 -m venv --system-site-packages venv`)
+        or edit "pyenv.cfg" (`include-system-site-packages = true`)
+
+      - then
+        
+        `brew install graph-tool`
 
 * Install with pip3. Move to the directory of this repository. Then,
 
