@@ -23,6 +23,10 @@ Requirements
 
 Setup
 -----
+* Install with pip3. Move to the directory of this repository. Then,
+
+    `pip3 install .`
+
 * Install graph-tool (https://graph-tool.skewed.de/installation.html)
   * For example, macOS with Homebrew (when not using virtual environment),
 
@@ -40,16 +44,11 @@ Setup
 
     - Option 2. Use virtual environment with "include-system-site-packages = true"
       
-      - Either make venv with --system-site-packages option (e.g., `python3 -m venv --system-site-packages venv`)
-        or edit "pyenv.cfg" (`include-system-site-packages = true`)
+      - For example, edit "pyenv.cfg" to be `include-system-site-packages = true`
 
       - then
         
         `brew install graph-tool`
-
-* Install with pip3. Move to the directory of this repository. Then,
-
-    `pip3 install .`
 
 ******
 
